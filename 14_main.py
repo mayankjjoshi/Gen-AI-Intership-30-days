@@ -17,7 +17,7 @@ for page in reader.pages:
 
 # chunking 
 
-def chunks_text(text,chunk_size=50, overlap=20):
+def chunks_text(text,chunk_size=1000, overlap=200):
     start = 0
     chunks = []
     while start < len(text):
@@ -26,12 +26,12 @@ def chunks_text(text,chunk_size=50, overlap=20):
     return chunks
 
 chunks = chunks_text(text)
-
+print(chunks)
 
 # embedding and store in db
 
-client = chromadb.Client()
-collection = client.create_collection("chatwithpdf")
+chroma_client = chromadb.Client()
+collection = chroma_client.create_collection("pdf")
 
 # for i in range(len(chunks)):
 #     print(str(i))
@@ -46,16 +46,17 @@ collection.add(
 user_input = input("Ask question to pdf :")
 
 relevant = collection.query(
-    query_texts=user_input,
+    query_texts=[user_input],
     n_results = 4
 )
 print(relevant)
-print(relevant.documents)
+print(relevant["documents"])
 # injection + generation
 
-user_prompt = """
+context = relevant["documents"][0]
+user_prompt = f"""
 provide answer based on user input based on below context only :
-{relevant}
+{context}
 and make sure answer provide only from context if you don't know just replied with "I don't Know"
 
 here is question : {user_input}
@@ -74,4 +75,4 @@ response = client.chat.complete(
     ]
 )
 
-# print(response.choices[0].message.content)
+print(response.choices[0].message.content)
