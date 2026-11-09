@@ -70,6 +70,7 @@ if response.tool_calls:
     messages.append(response)
     for tc in response.tool_calls:
         # print(tc)
+        result = f"unknown tool: {tc.function.name}"
         if tc.function.name == "get_menu":
             result = get_menu()
         formatted_result =  json.dumps(result)
